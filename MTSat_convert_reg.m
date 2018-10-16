@@ -1,8 +1,8 @@
-function pipeline_MTSat_convert_reg(opts)
-%convert data from dicom to nii
-%then co-register images
+function MTSat_convert_reg(opts)
+%% Convert data from dicom to nii, sum over all echoes, co-register images
+%% Extract acquisition parameters
 
-%% create output directory or delete any existing contents
+%% create output directory or delete existing contents
 mkdir(opts.outputDir); delete([opts.outputDir '/*.*']);
 
 %% initialise variables
@@ -45,8 +45,8 @@ for iSeries=1:3
     
     %% sum signal over all echoes
     temp=dir([opts.outputDir '/' seriesNames{iSeries} '*.nii']); NEchoes=size(temp,1);
-    str1=['fslmaths ' opts.outputDir '/' seriesNames{iSeries} '_echo1'];
-    str2=['fslmerge -t ' opts.outputDir '/' seriesNames{iSeries} '_allEchoes ' opts.outputDir '/' seriesNames{iSeries} '_echo1'];
+    str1=['fslmaths ' opts.outputDir '/' seriesNames{iSeries} '_echo1']; %string to execute in Linux for summing echoes
+    str2=['fslmerge -t ' opts.outputDir '/' seriesNames{iSeries} '_allEchoes ' opts.outputDir '/' seriesNames{iSeries} '_echo1']; %string to execute in Linux for merging echoes into 4D image
     for iEcho=2:NEchoes;
         str1=[str1 ' -add ' opts.outputDir '/' seriesNames{iSeries} '_echo' num2str(iEcho)];
         str2=[str2 ' ' opts.outputDir '/' seriesNames{iSeries} '_echo' num2str(iEcho)];
@@ -54,9 +54,10 @@ for iSeries=1:3
     str1=[str1 ' ' opts.outputDir '/' seriesNames{iSeries}];
     system(str1); %sum echoes using fslmaths
     system(str2); %combine echoes into 4D nii using fslmerge
+
 end
 
-%% assign acquisition parametesr to acqPars struct
+%% assign acquisition parameters to acqPars struct
 [acqPars.TR_PD,acqPars.TR_T1,acqPars.TR_MT]=deal(TR(1),TR(2),TR(3));
 [acqPars.aDeg_PD,acqPars.aDeg_T1,acqPars.aDeg_MT]=deal(aDeg(1),aDeg(2),aDeg(3));
 [acqPars.a_PD,acqPars.a_T1,acqPars.a_MT]=deal(aDeg(1)*((2*pi)/360),aDeg(2)*((2*pi)/360),aDeg(3)*((2*pi)/360));
@@ -69,7 +70,7 @@ disp(['MT: TR=' num2str(acqPars.TR_MT) ' aDeg=' num2str(acqPars.aDeg_MT) ' a (ra
 
 save([opts.outputDir '/acqPars'],'acqPars');
 
-%% co-register images to PD scan using FLIRT, then merge all 3 images into 4D image
+%% co-register echo-summed images to echo-summed PD image using FLIRT, then merge all 3 coregistered images into 4D image
 refFile=[opts.outputDir '/PD.nii'];
 system([ 'flirt -in ' opts.outputDir '/T1.nii -ref ' refFile ' -out ' opts.outputDir '/reg_T1' ' -omat ' opts.outputDir '/T12PD.txt -dof 6 -cost normmi']); %FLIRT
 system([ 'flirt -in ' opts.outputDir '/MT.nii -ref ' refFile ' -out ' opts.outputDir '/reg_MT' ' -omat ' opts.outputDir '/MT2PD.txt -dof 6 -cost normmi']); %FLIRT

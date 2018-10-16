@@ -1,9 +1,9 @@
-function pipeline_MTSat_create_maps(opts)
-%% generate MTSat (and other parameter) images from-coregistered nii files
+function MTSat_create_maps(opts)
+%% generate MTSat (and other parameter) images from coregistered nii files
 
 %% load acquisition parameters, delete existing parameter maps
 load([opts.outputDir '/acqPars'],'acqPars');
-delete([opts.outputDir '/map_*.*']);
+delete([opts.outputDir '/delta_app.*']); delete([opts.outputDir '/A_app.*']); delete([opts.outputDir '/MTR.*']); delete([opts.outputDir '/T1_app.*']); delete([opts.outputDir '/R1_app.*']);
 
 %% load 4D magnitude data
 [S_PD,xyz]=spm_read_vols(spm_vol([opts.outputDir '/PD.nii']));
@@ -33,11 +33,17 @@ MTR = 100 * ((S_PD - S_MT) ./ S_PD);
 
 T1_app = 1./R1_app;
 
-%% write output images
+%% apply threshold, write output images
 paramNames={'A_app' 'R1_app' 'delta_app' 'MTR' 'T1_app'};
 outputs={A_app R1_app delta_app MTR T1_app};
 for iOutput=1:size(outputs,2)
+    outputs{iOutput}(S_PD<opts.thresholdPD)=nan;
     SPMWrite4D(volTemplate,outputs{iOutput},opts.outputDir,paramNames{iOutput},16);
 end
+
+%% delete superfluous images
+delete([opts.outputDir '/MT_echo*.*']);
+delete([opts.outputDir '/T1_echo*.*']);
+delete([opts.outputDir '/PD_echo*.*']);
 
 end
