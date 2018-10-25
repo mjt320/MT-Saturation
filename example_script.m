@@ -13,11 +13,12 @@ opts.seriesT1=9;
 opts.seriesPD=8;
 opts.thresholdPD=300; %if PD intensity (sum over echoes) is less than this then output will be NaN for all MT parameter maps
 opts.dicomExamDir='./dicom'; %exam dicom directory
-opts.outputDir='./results_R2s'; %output directory for parameter maps
+opts.outputDir='./results_R2s_linear'; %output directory for parameter maps
 
 opts.R2s_fit=[1 1 1]; % (for R2* mapping) which echoes to fit (optional argument)
 opts.R2s_threshold1=40; % (for R2* mapping) exclude voxels where first echo is less intense than this (avoid fitting voxels in air)
 opts.R2s_threshold2=40; % (for R2* mapping) exclude echoes from fitting if less intense than this (avoid fitting noisy data points)
+opts.R2s_fittingMode='nonlinear'; % optional argument to specify linear versus non-linear fitting
 
 %% run pipeline steps
 MTSat_convert_reg(opts); %convert from dicom to nii, sum signal over echoes, co-register to PD image
