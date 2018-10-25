@@ -15,7 +15,7 @@ volTemplate=spm_vol([opts.outputDir '/PD.nii']); %use this header as template fo
 R2s=nan(volTemplate.dim); S0=nan(volTemplate.dim); T2s=nan(volTemplate.dim); RSq=nan(volTemplate.dim); model=nan([volTemplate.dim sum(opts.R2s_fit,2)]);
 
 %% do the fitting
-for i3=1:size(magnitudePD,3); for i1=1:size(magnitudePD,1); for i2=30%1:size(magnitudePD,2) %loop through voxels
+for i3=1:size(magnitudePD,3); for i1=1:size(magnitudePD,1); for i2=1:size(magnitudePD,2) %loop through voxels
             
             [S0(i1,i2,i3),R2s(i1,i2,i3),T2s(i1,i2,i3),RSq(i1,i2,i3),model(i1,i2,i3,:)] = ...
                 fit_R2s(acqPars.TE_PD_s.',magnitudePD(i1,i2,i3,:),opts.R2s_fit,opts.R2s_threshold1,opts.R2s_threshold2,struct('mode',opts.R2s_fittingMode));
