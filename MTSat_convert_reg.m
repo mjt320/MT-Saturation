@@ -46,7 +46,7 @@ for iSeries=1:3
     aDeg(iSeries)=temp.FlipAngle;
     
     %% convert dicoms to 3D niftis using dcm2niix
-    system(['dcm2niix -f ' seriesNames{iSeries} '_echo%e -t n -v n -b y -o ' opts.outputDir ' ' dicomDir]);
+    system(['dcm2niix -f ' seriesNames{iSeries} '_echo%e -t n -v n -b y -z n -o ' opts.outputDir ' ' dicomDir]);
     
     %% sum signal over all echoes
     temp=dir([opts.outputDir '/' seriesNames{iSeries} '*.nii']); NEchoes(iSeries)=size(temp,1);
